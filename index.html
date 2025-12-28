@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caminho do Bem - Gestão Comunitária</title>
+    
+    <!-- Frameworks e Fontes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --indigo-primary: #4f46e5;
+            --bg-main: #f8fafc;
+            --text-main: #1e293b;
+            --card-bg: #ffffff;
+            --border-color: #f1f5f9;
+            --input-bg: #f8fafc;
+        }
+
+        .dark-mode {
+            --bg-main: #0f172a;
+            --text-main: #f8fafc;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .font-serif { font-family: 'Playfair Display', serif; }
+
+        /* Estilização da Sidebar */
+        #sidebar { background-color: var(--card-bg); border-color: var(--border-color); }
+        #sidebar.collapsed { width: 80px; }
+        #sidebar.collapsed .logo-text, 
+        #sidebar.collapsed .nav-text { display: none; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .nav-item:hover { background-color: #f1f5f9; color: var(--indigo-primary); }
+        .dark-mode .nav-item:hover { background-color: #334155; }
+
+        .nav-item-active {
+            background-color: var(--indigo-primary);
+            color: white !important;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.2);
+        }
+
+        .glass-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Animações */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.98) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .animate-content { animation: fadeInScale 0.4s ease-out forwards; }
+
+        /* Switch Toggle Customizado */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px; width: 18px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--indigo-primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 border-r transition-all duration-300 flex flex-col sticky top-0 h-screen z-40">
+            <div class="p-6 flex items-center justify-between min-w-[256px]">
+                <div class="flex items-center gap-3 font-black text-xl text-indigo-600 logo-text">
+                    <div id="logo-icon" class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-serif italic shadow-lg">CB</div>
+                    <span id="sidebar-app-name">Caminho do Bem</span>
+                </div>
+                <button onclick="toggleSidebar()" class="p-2 hover:bg-slate-100 rounded-xl text-slate-400 dark:hover:bg-slate-800">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2 mt-4">
+                <div onclick="setActiveTab('início')" data-tab="início" class="nav-item nav-item-active">
+                    <i data-lucide="home"></i> <span class="nav-text">Início</span>
+                </div>
+                <div onclick="setActiveTab('membros')" data-tab="membros" class="nav-item">
+                    <i data-lucide="users"></i> <span class="nav-text">Membros</span>
+                </div>
+                <div onclick="setActiveTab('mensalidades')" data-tab="mensalidades" class="nav-item">
+                    <i data-lucide="credit-card"></i> <span class="nav-text">Mensalidades</span>
+                </div>
+                <div onclick="setActiveTab('configurações')" data-tab="configurações" class="nav-item">
+                    <i data-lucide="settings"></i> <span class="nav-text">Configurações</span>
+                </div>
+            </nav>
+
+            <div class="p-6 border-t border-slate-50 dark:border-slate-800">
+                <button onclick="location.reload()" class="flex items-center gap-3 text-slate-400 hover:text-rose-500 transition-colors w-full px-4 py-2 font-bold">
+                    <i data-lucide="log-out"></i>
+                    <span class="nav-text">Sair</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="flex-1 p-6 md:p-12 lg:p-16">
+            <div id="app-content" class="max-w-5xl mx-auto">
+                <!-- Conteúdo renderizado por JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Notificações -->
+    <div id="notification-container" class="fixed bottom-8 right-8 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <script>
+        // --- Estado Global ---
+        let currentTab = 'início';
+        let config = {
+            appName: "Caminho do Bem",
+            appDescription: "Plataforma de gestão comunitária para consulta de mensalidades e atividades de forma rápida.",
+            darkMode: false
+        };
+        
+        let members = [
+            { id: 1, name: 'João Silva', email: 'joao@exemplo.pt' },
+            { id: 2, name: 'Ana Costa', email: 'ana@exemplo.pt' }
+        ];
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        function setActiveTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.toggle('nav-item-active', el.getAttribute('data-tab') === tab);
+            });
+            render();
+        }
+
+        function notify(msg, type = 'success') {
+            const container = document.getElementById('notification-container');
+            const toast = document.createElement('div');
+            const colors = type === 'success' ? 'bg-white border-emerald-100 text-emerald-600' : 'bg-white border-rose-100 text-rose-600';
+            
+            toast.className = `flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl border animate-content pointer-events-auto font-bold ${colors}`;
+            toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" size="20"></i> <span>${msg}</span>`;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        function toggleDarkMode() {
+            config.darkMode = !config.darkMode;
+            document.body.classList.toggle('dark-mode', config.darkMode);
+            notify(`Modo ${config.darkMode ? 'Escuro' : 'Claro'} ativado`);
+        }
+
+        function handleLogin() {
+            notify('Funcionalidade de Login em breve!');
+        }
+
+        function render() {
+            const container = document.getElementById('app-content');
+            container.innerHTML = ''; 
+            const wrapper = document.createElement('div');
+            wrapper.className = 'animate-content';
+
+            if (currentTab === 'início') {
+                wrapper.innerHTML = `
+                    <div class="space-y-6">
+                        <h1 class="text-6xl font-black leading-tight">Olá, <br/><span class="text-indigo-600 font-serif italic">${config.appName}</span></h1>
+                        <p class="text-xl text-slate-500 max-w-xl">${config.appDescription}</p>
+                    </div>
+                `;
+            } else if (currentTab === 'configurações') {
+                wrapper.innerHTML = `
+                    <div class="max-w-md mx-auto space-y-8 py-12">
+                        <h2 class="text-3xl font-black text-center">Configurações</h2>
+                        <div class="glass-card p-8 rounded-[2rem] space-y-6 shadow-sm">
+                            <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
+                                <div>
+                                    <p class="font-bold">Modo Escuro</p>
+                                    <p class="text-xs text-slate-400">Alterar tema visual</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" ${config.darkMode ? 'checked' : ''} onchange="toggleDarkMode()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <button onclick="handleLogin()" class="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-lg transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="log-in" size="20"></i>
+                                Entrar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (currentTab === 'membros') {
+                wrapper.innerHTML = `
+                    <div class="space-y-8">
+                        <h2 class="text-3xl font-black">Membros</h2>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            ${members.map(m => `
+                                <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-bold dark:bg-indigo-900/30">${m.name[0]}</div>
+                                        <div><p class="font-bold text-sm">${m.name}</p><p class="text-xs text-slate-400">${m.email}</p></div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                wrapper.innerHTML = `
+                    <div class="py-20 text-center">
+                        <i data-lucide="construction" class="mx-auto mb-4 text-slate-300" size="48"></i>
+                        <h2 class="text-2xl font-bold text-slate-300 uppercase tracking-tighter italic">Em Desenvolvimento</h2>
+                    </div>
+                `;
+            }
+
+            container.appendChild(wrapper);
+            lucide.createIcons();
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>
