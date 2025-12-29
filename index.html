@@ -2,452 +2,189 @@
 <html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caminho do Bem - Painel Administrativo</title>
-    <!-- Tailwind CSS para estilização rápida e moderna -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-        }
-
-        .hero-card {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        }
-
-        .nav-item {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-        }
-
-        .nav-item-active {
-            background-color: #4f46e5;
-            color: white !important;
-            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.2);
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        #notification-container {
-            position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
-            z-index: 9999;
-            pointer-events: none;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #e2e8f0;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #cbd5e1;
-        }
+        body { background-color: #f8fafc; margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; transition: background-color 0.3s; }
+        .nav-item-active { background-color: var(--primary-color, #4f46e5); color: white !important; }
+        .btn-primary { background-color: var(--primary-color, #4f46e5); }
+        .text-primary { color: var(--primary-color, #4f46e5); }
+        .animate-fade { animation: fadeIn 0.4s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="antialiased text-slate-900">
-
-    <!-- Container de Notificações -->
-    <div id="notification-container"></div>
-
-    <div class="flex min-h-screen overflow-hidden">
-        
-        <!-- Barra Lateral (Sidebar) -->
-        <aside id="sidebar" class="bg-white border-r border-slate-100 flex-col py-8 px-4 transition-all duration-300 w-64 hidden shadow-sm">
-            <div class="flex items-center gap-3 px-4 mb-10">
-                <div class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                    <i data-lucide="heart" size="20"></i>
-                </div>
-                <h1 class="font-black text-xl tracking-tighter sidebar-text">CBEM</h1>
-            </div>
-
-            <nav class="space-y-2 flex-1">
-                <div onclick="setActiveTab('início')" data-tab="início" class="nav-item nav-item-active flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm">
-                    <i data-lucide="layout-dashboard" size="20"></i>
-                    <span class="sidebar-text">Painel</span>
-                </div>
-                <div onclick="setActiveTab('membros')" data-tab="membros" class="nav-item text-slate-400 hover:bg-slate-50 flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm">
-                    <i data-lucide="users" size="20"></i>
-                    <span class="sidebar-text">Membros</span>
-                </div>
-                <div onclick="setActiveTab('atividades')" data-tab="atividades" class="nav-item text-slate-400 hover:bg-slate-50 flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm">
-                    <i data-lucide="calendar" size="20"></i>
-                    <span class="sidebar-text">Agenda</span>
-                </div>
-                <div onclick="setActiveTab('config')" data-tab="config" class="nav-item text-slate-400 hover:bg-slate-50 flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm">
-                    <i data-lucide="settings" size="20"></i>
-                    <span class="sidebar-text">Definições</span>
-                </div>
-            </nav>
-
-            <div class="pt-6 border-t border-slate-50 mt-auto">
-                <button onclick="toggleSidebar()" class="w-full flex items-center justify-center p-3 text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition-all">
-                    <i data-lucide="menu" size="20"></i>
-                </button>
-            </div>
-        </aside>
-
-        <!-- Área Principal de Conteúdo -->
-        <main class="flex-1 flex flex-col h-screen overflow-hidden">
-            <div id="app-content" class="flex-1 overflow-y-auto p-6 md:p-12 transition-all duration-300 opacity-100">
-                <!-- Conteúdo renderizado via JavaScript -->
-            </div>
-        </main>
-
-    </div>
+<body>
+    <div id="app-root"></div>
 
     <script>
-        // --- Estado da Aplicação ---
-        let activeTab = 'início';
-        let isSidebarOpen = true;
-        let isAuthenticated = false; 
-        let users = [
-            { id: 1, name: 'João Silva', email: 'joao@exemplo.com' },
-            { id: 2, name: 'Maria Santos', email: 'maria@exemplo.com' }
-        ];
-        let editingId = null;
-
-        // --- Inicialização ---
-        function init() {
-            if (window.lucide) window.lucide.createIcons();
-            render();
-        }
-
-        // --- Gestão de Interface ---
-
-        window.toggleSidebar = function() {
-            isSidebarOpen = !isSidebarOpen;
-            const sidebar = document.getElementById('sidebar');
-            const texts = document.querySelectorAll('.sidebar-text');
-            
-            if (sidebar) {
-                if (isSidebarOpen) {
-                    sidebar.classList.remove('w-20');
-                    sidebar.classList.add('w-64');
-                    texts.forEach(t => t.style.display = 'block');
-                } else {
-                    sidebar.classList.remove('w-64');
-                    sidebar.classList.add('w-20');
-                    texts.forEach(t => t.style.display = 'none');
-                }
-            }
-            if (window.lucide) window.lucide.createIcons();
+        // --- DADOS ---
+        let users = [{ id: 1, name: 'João Silva', email: 'joao@exemplo.com', password: '123' }];
+        let activeTab = 'login';
+        let currentUser = null;
+        let isRegistering = false;
+        
+        // Configurações do Sistema
+        let settings = {
+            orgName: 'CBEM',
+            primaryColor: '#4f46e5',
+            welcomeMsg: 'Bem-vindo ao sistema Caminho do Bem.'
         };
 
-        window.setActiveTab = function(tab) {
-            if (!isAuthenticated) return;
-            activeTab = tab;
-            
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                const btnTab = btn.getAttribute('data-tab');
-                if (btnTab === tab) {
-                    btn.classList.add('nav-item-active');
-                    btn.classList.remove('text-slate-400', 'hover:bg-slate-50');
-                } else {
-                    btn.classList.remove('nav-item-active');
-                    btn.classList.add('text-slate-400', 'hover:bg-slate-50');
-                }
-            });
-            
-            render();
-        };
-
-        function showNotice(message, type = 'success') {
-            const container = document.getElementById('notification-container');
-            if (!container) return;
-
-            const toast = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-white border-emerald-100 text-emerald-700' : 'bg-white border-rose-100 text-rose-700';
-            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
-            
-            toast.className = `flex items-center gap-3 px-5 py-4 rounded-[1.25rem] text-sm font-bold shadow-2xl border animate-fade-in ${bgColor} mb-3 transition-all duration-300 pointer-events-auto`;
-            toast.innerHTML = `<i data-lucide="${icon}" size="18"></i> <span>${message}</span>`;
-            
-            container.appendChild(toast);
-            if (window.lucide) window.lucide.createIcons();
-            
-            setTimeout(() => {
-                toast.style.opacity = "0";
-                toast.style.transform = "translateX(20px)";
-                setTimeout(() => toast.remove(), 400);
-            }, 3000);
-        }
-
-        // --- Renderização de Conteúdo ---
-
+        // --- MOTOR DE RENDERIZAÇÃO ---
         function render() {
-            const container = document.getElementById('app-content');
-            const sidebar = document.getElementById('sidebar');
-            if (!container) return;
-            
-            container.style.opacity = '0';
-            
-            setTimeout(() => {
-                container.innerHTML = '';
-                
-                if (!isAuthenticated) {
-                    if (sidebar) sidebar.classList.add('hidden');
-                    renderLogin(container);
-                } else {
-                    if (sidebar) sidebar.classList.remove('hidden');
-                    sidebar.classList.add('flex');
-                    
-                    switch(activeTab) {
-                        case 'início': renderDashboard(container); break;
-                        case 'membros': renderMembros(container); break;
-                        case 'config': renderConfig(container); break;
-                        default: renderEmDesenvolvimento(container);
-                    }
-                }
-                
-                container.style.opacity = '1';
-                if (window.lucide) window.lucide.createIcons();
-            }, 150);
-        }
+            const root = document.getElementById('app-root');
+            document.documentElement.style.setProperty('--primary-color', settings.primaryColor);
 
-        function renderLogin(container) {
-            container.innerHTML = `
-                <div class="min-h-[85vh] flex items-center justify-center animate-fade-in">
-                    <div class="bg-white p-10 md:p-14 rounded-[3rem] shadow-2xl border border-slate-100 w-full max-w-md text-center">
-                        <div class="w-20 h-20 bg-indigo-600 rounded-[2rem] flex items-center justify-center text-white mx-auto mb-10 shadow-xl shadow-indigo-100">
-                            <i data-lucide="lock" size="32"></i>
+            if (activeTab === 'login') {
+                root.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen bg-slate-50 p-6">
+                    <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border w-full max-w-md animate-fade">
+                        ${isRegistering ? `
+                            <h2 class="text-2xl font-black mb-6">Nova Conta</h2>
+                            <form onsubmit="handleReg(event)" class="space-y-4">
+                                <input type="text" id="r-name" placeholder="Nome" required class="w-full p-4 bg-slate-50 rounded-xl outline-none border focus:border-indigo-500">
+                                <input type="email" id="r-email" placeholder="Email" required class="w-full p-4 bg-slate-50 rounded-xl outline-none border focus:border-indigo-500">
+                                <input type="password" id="r-pass" placeholder="Senha" required class="w-full p-4 bg-slate-50 rounded-xl outline-none border focus:border-indigo-500">
+                                <button type="submit" class="w-full btn-primary text-white font-bold py-4 rounded-xl">Criar Conta</button>
+                            </form>
+                            <button onclick="isRegistering=false;render()" class="mt-4 text-sm text-gray-400 w-full">Voltar</button>
+                        ` : `
+                            <div class="w-16 h-16 btn-primary rounded-2xl flex items-center justify-center text-white mx-auto mb-6"><i data-lucide="lock"></i></div>
+                            <h2 class="text-2xl font-black mb-8 text-center">Login</h2>
+                            <form onsubmit="handleLogin(event)" class="space-y-4">
+                                <input type="email" id="l-email" placeholder="joao@exemplo.com" required class="w-full p-4 bg-slate-50 rounded-xl outline-none border focus:border-indigo-500">
+                                <input type="password" id="l-pass" placeholder="Senha (123)" required class="w-full p-4 bg-slate-50 rounded-xl outline-none border focus:border-indigo-500">
+                                <button type="submit" class="w-full btn-primary text-white font-bold py-4 rounded-xl hover:opacity-90 transition-all">Entrar</button>
+                            </form>
+                            <button onclick="isRegistering=true;render()" class="mt-6 text-primary font-bold text-sm w-full">Criar conta</button>
+                        `}
+                    </div>
+                </div>`;
+            } else {
+                root.innerHTML = `
+                <div class="flex h-screen overflow-hidden">
+                    <aside class="w-64 bg-white border-r p-6 flex flex-col">
+                        <div class="flex items-center gap-3 mb-10">
+                            <div class="w-10 h-10 btn-primary rounded-xl flex items-center justify-center text-white"><i data-lucide="heart"></i></div>
+                            <span class="font-black text-xl tracking-tighter">${settings.orgName}</span>
                         </div>
-                        <h2 class="text-3xl font-black text-slate-900 mb-3 tracking-tight">Portal Administrativo</h2>
-                        <p class="text-slate-400 mb-10 font-medium">Bem-vindo de volta ao Caminho do Bem.</p>
-                        
-                        <form onsubmit="window.handleLogin(event)" class="space-y-6 text-left">
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Utilizador</label>
-                                <div class="relative">
-                                    <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size="18"></i>
-                                    <input type="text" required class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold" placeholder="Insira o seu utilizador">
-                                </div>
+                        <nav class="flex-1 space-y-2">
+                            <div onclick="activeTab='inicio';render()" class="flex items-center gap-3 p-4 rounded-xl cursor-pointer font-bold ${activeTab==='inicio'?'nav-item-active text-white':'text-gray-500 hover:bg-gray-50'}">
+                                <i data-lucide="layout-dashboard"></i><span>Início</span>
                             </div>
-                            
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Palavra-passe</label>
-                                <div class="relative">
-                                    <i data-lucide="key-round" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size="18"></i>
-                                    <input type="password" required class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold" placeholder="••••••••">
-                                </div>
+                            <div onclick="activeTab='membros';render()" class="flex items-center gap-3 p-4 rounded-xl cursor-pointer font-bold ${activeTab==='membros'?'nav-item-active text-white':'text-gray-500 hover:bg-gray-50'}">
+                                <i data-lucide="users"></i><span>Membros</span>
                             </div>
-
-                            <button type="submit" class="w-full py-5 bg-indigo-600 text-white font-black rounded-[1.5rem] shadow-xl shadow-indigo-100 hover:bg-indigo-700 active:scale-[0.98] transition-all flex items-center justify-center gap-3 mt-4 group">
-                                Confirmar Acesso 
-                                <i data-lucide="arrow-right" size="20" class="group-hover:translate-x-1 transition-transform"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            `;
-        }
-
-        window.handleLogin = function(e) {
-            e.preventDefault();
-            showNotice('A autenticar dados...');
-            setTimeout(() => {
-                isAuthenticated = true;
-                showNotice('Bem-vindo ao sistema!');
-                render();
-            }, 800);
-        };
-
-        function renderDashboard(container) {
-            container.innerHTML = `
-                <div class="space-y-10 animate-fade-in max-w-6xl mx-auto">
-                    <div class="hero-card p-10 md:p-16 rounded-[3rem] text-white relative overflow-hidden shadow-2xl shadow-indigo-100">
-                        <div class="relative z-10">
-                            <span class="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase mb-8 tracking-widest">Painel de Gestão</span>
-                            <h2 class="text-4xl md:text-7xl font-black mb-8 leading-[1.1] tracking-tight">Caminho <br/><span class="italic font-serif opacity-80 underline decoration-white/30 decoration-4">do Bem</span></h2>
-                            <p class="text-xl text-indigo-50/90 max-w-md font-medium">Atualmente gere ${users.length} membros registados na sua comunidade.</p>
+                            <div onclick="activeTab='configuracoes';render()" class="flex items-center gap-3 p-4 rounded-xl cursor-pointer font-bold ${activeTab==='configuracoes'?'nav-item-active text-white':'text-gray-500 hover:bg-gray-50'}">
+                                <i data-lucide="settings"></i><span>Definições</span>
+                            </div>
+                        </nav>
+                        <button onclick="currentUser=null;activeTab='login';render()" class="text-red-500 font-bold p-4 hover:bg-red-50 rounded-xl flex items-center gap-3">
+                            <i data-lucide="log-out"></i><span>Sair</span>
+                        </button>
+                    </aside>
+                    <main class="flex-1 p-10 overflow-y-auto bg-slate-50" id="main-content"></main>
+                </div>`;
+                
+                const main = document.getElementById('main-content');
+                
+                if (activeTab === 'inicio') {
+                    main.innerHTML = `
+                    <div class="animate-fade space-y-8">
+                        <div class="btn-primary p-12 rounded-[2.5rem] text-white shadow-xl">
+                            <h2 class="text-3xl font-black mb-2">Olá, ${currentUser.name}!</h2>
+                            <p class="opacity-80">${settings.welcomeMsg}</p>
                         </div>
-                        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        ${renderStat(users.length, 'Membros Registados', 'users')}
-                        ${renderStat('12', 'Atividades Próximas', 'calendar')}
-                        ${renderStat('98%', 'Taxa de Presença', 'check-square')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderStat(val, label, icon) {
-            return `
-                <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div class="w-14 h-14 bg-slate-50 text-indigo-600 rounded-[1.25rem] flex items-center justify-center mb-6">
-                        <i data-lucide="${icon}" size="24"></i>
-                    </div>
-                    <p class="text-4xl font-black text-slate-900 tracking-tight">${val}</p>
-                    <p class="text-slate-400 text-[11px] font-black uppercase tracking-widest mt-2">${label}</p>
-                </div>
-            `;
-        }
-
-        function renderMembros(container) {
-            container.innerHTML = `
-                <div class="animate-fade-in space-y-10 max-w-6xl mx-auto">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                        <h2 class="text-4xl font-black tracking-tight">Membros</h2>
-                        <div class="bg-white px-6 py-3 rounded-2xl border border-slate-100 flex items-center gap-3 shadow-sm w-full md:w-80">
-                            <i data-lucide="search" size="18" class="text-slate-300"></i>
-                            <input type="text" oninput="window.handleSearch(this.value)" placeholder="Pesquisar por nome..." class="outline-none text-sm font-semibold bg-transparent w-full">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-white p-8 rounded-2xl border shadow-sm text-center">
+                                <p class="text-gray-400 text-xs font-bold uppercase mb-2">Total Membros</p>
+                                <p class="text-4xl font-black">${users.length}</p>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                        <div class="lg:col-span-1">
-                            <form onsubmit="window.handleSubmit(event)" class="bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-5 sticky top-12">
-                                <h3 class="font-black text-xl mb-6 text-indigo-600">${editingId ? 'Editar Registo' : 'Novo Membro'}</h3>
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Nome</label>
-                                    <input id="in-name" type="text" placeholder="Ex: Ana Souza" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all border-none font-semibold">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Endereço Email</label>
-                                    <input id="in-email" type="email" placeholder="exemplo@mail.com" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all border-none font-semibold">
-                                </div>
-                                <button class="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all mt-4">
-                                    ${editingId ? 'Guardar Alterações' : 'Finalizar Registo'}
-                                </button>
-                                ${editingId ? `<button type="button" onclick="window.cancelEdit()" class="w-full text-slate-400 font-bold text-xs uppercase tracking-widest mt-2 hover:text-slate-600 transition-colors">Cancelar Edição</button>` : ''}
+                    </div>`;
+                } else if (activeTab === 'membros') {
+                    main.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade">
+                        <div class="bg-white p-8 rounded-3xl border shadow-sm lg:col-span-1">
+                            <h2 class="text-xl font-black mb-6">Novo Membro</h2>
+                            <form onsubmit="addMem(event)" class="space-y-4">
+                                <input id="m-name" placeholder="Nome" required class="w-full p-3 bg-gray-50 rounded-xl outline-none border focus:border-indigo-500">
+                                <input id="m-email" placeholder="Email" required class="w-full p-3 bg-gray-50 rounded-xl outline-none border focus:border-indigo-500">
+                                <button class="w-full btn-primary text-white font-bold py-3 rounded-xl shadow-lg">Salvar</button>
                             </form>
                         </div>
-                        <div id="users-list" class="lg:col-span-2 space-y-4"></div>
-                    </div>
-                </div>
-            `;
-            renderList();
+                        <div class="lg:col-span-2 space-y-4">
+                            ${users.map(u => `
+                                <div class="bg-white p-5 rounded-2xl border flex items-center justify-between hover:shadow-md transition-all">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 rounded-xl bg-slate-50 text-primary flex items-center justify-center font-black">${u.name[0]}</div>
+                                        <div><p class="font-black text-gray-800">${u.name}</p><p class="text-xs text-gray-400">${u.email}</p></div>
+                                    </div>
+                                    <button onclick="delMem(${u.id})" class="text-gray-300 hover:text-red-500 transition-colors"><i data-lucide="trash-2"></i></button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                } else if (activeTab === 'configuracoes') {
+                    main.innerHTML = `
+                    <div class="max-w-2xl animate-fade">
+                        <h2 class="text-3xl font-black mb-8">Definições do Sistema</h2>
+                        <div class="bg-white p-8 rounded-3xl border shadow-sm space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-gray-500 uppercase">Nome da Organização</label>
+                                <input type="text" id="set-org" value="${settings.orgName}" class="w-full p-4 bg-slate-50 rounded-xl border outline-none focus:border-indigo-500">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-gray-500 uppercase">Mensagem de Boas-vindas</label>
+                                <input type="text" id="set-msg" value="${settings.welcomeMsg}" class="w-full p-4 bg-slate-50 rounded-xl border outline-none focus:border-indigo-500">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-gray-500 uppercase">Cor do Tema</label>
+                                <div class="flex gap-4">
+                                    <input type="color" id="set-color" value="${settings.primaryColor}" class="h-14 w-20 rounded-lg cursor-pointer border-none bg-transparent">
+                                    <span class="self-center text-sm text-gray-400">Escolha a cor principal da interface</span>
+                                </div>
+                            </div>
+                            <button onclick="saveSettings()" class="w-full btn-primary text-white font-bold py-4 rounded-xl shadow-lg transition-transform active:scale-95">Guardar Alterações</button>
+                        </div>
+                    </div>`;
+                }
+            }
+            lucide.createIcons();
         }
 
-        // --- Funções de Ação ---
-
-        window.handleSubmit = function(e) {
+        // --- LÓGICA ---
+        window.handleLogin = (e) => {
             e.preventDefault();
-            const n = document.getElementById('in-name').value;
-            const m = document.getElementById('in-email').value;
-            if(!n || !m) return showNotice('Preencha todos os campos!', 'error');
+            const u = users.find(x => x.email === document.getElementById('l-email').value && x.password === document.getElementById('l-pass').value);
+            if (u) { currentUser = u; activeTab = 'inicio'; render(); } 
+            else { alert('Email ou senha incorretos!'); }
+        };
 
-            if(editingId) {
-                users = users.map(u => u.id === editingId ? {id: u.id, name: n, email: m} : u);
-                editingId = null;
-                showNotice('Dados atualizados com sucesso!');
-            } else {
-                users.push({id: Date.now(), name: n, email: m});
-                showNotice('Novo membro registado!');
-            }
+        window.handleReg = (e) => {
+            e.preventDefault();
+            users.push({ id: Date.now(), name: document.getElementById('r-name').value, email: document.getElementById('r-email').value, password: document.getElementById('r-pass').value });
+            isRegistering = false; render();
+        };
+
+        window.addMem = (e) => {
+            e.preventDefault();
+            users.push({ id: Date.now(), name: document.getElementById('m-name').value, email: document.getElementById('m-email').value, password: '123' });
             render();
-        }
+        };
 
-        window.deleteUser = function(id) {
-            if(confirm('Tem a certeza que deseja remover este membro?')) {
-                users = users.filter(u => u.id !== id);
-                showNotice('Registo removido.', 'error');
-                render();
-            }
-        }
+        window.delMem = (id) => { users = users.filter(x => x.id !== id); render(); };
 
-        window.editUser = function(id) {
-            const u = users.find(x => x.id === id);
-            editingId = id;
+        window.saveSettings = () => {
+            settings.orgName = document.getElementById('set-org').value;
+            settings.welcomeMsg = document.getElementById('set-msg').value;
+            settings.primaryColor = document.getElementById('set-color').value;
             render();
-            document.getElementById('in-name').value = u.name;
-            document.getElementById('in-email').value = u.email;
-        }
+            alert('Configurações aplicadas!');
+        };
 
-        window.cancelEdit = function() {
-            editingId = null;
-            render();
-        }
-
-        window.handleSearch = function(val) {
-            const filtered = users.filter(u => u.name.toLowerCase().includes(val.toLowerCase()));
-            renderList(filtered);
-        }
-
-        function renderList(data = users) {
-            const list = document.getElementById('users-list');
-            if(!list) return;
-            
-            if (data.length === 0) {
-                list.innerHTML = `
-                    <div class="bg-white p-20 rounded-[2.5rem] border border-dashed border-slate-200 text-center">
-                        <i data-lucide="search-x" class="mx-auto text-slate-200 mb-4" size="48"></i>
-                        <p class="text-slate-400 font-bold">Nenhum resultado encontrado.</p>
-                    </div>
-                `;
-            } else {
-                list.innerHTML = data.map(u => `
-                    <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 flex items-center justify-between group hover:shadow-lg transition-all duration-300">
-                        <div class="flex items-center gap-5">
-                            <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-[1.25rem] flex items-center justify-center font-black text-2xl shadow-inner">
-                                ${u.name[0].toUpperCase()}
-                            </div>
-                            <div>
-                                <p class="font-black text-slate-900 text-lg">${u.name}</p>
-                                <p class="text-sm text-slate-400 font-medium">${u.email}</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="editUser(${u.id})" class="p-3 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
-                                <i data-lucide="edit-3" size="20"></i>
-                            </button>
-                            <button onclick="deleteUser(${u.id})" class="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
-                                <i data-lucide="trash-2" size="20"></i>
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            if (window.lucide) window.lucide.createIcons();
-        }
-
-        function renderConfig(container) {
-            container.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-20 text-center animate-fade-in max-w-6xl mx-auto">
-                    <div class="w-24 h-24 bg-indigo-600 rounded-[2.5rem] flex items-center justify-center text-white mb-10 shadow-2xl shadow-indigo-100">
-                        <i data-lucide="shield-check" size="40"></i>
-                    </div>
-                    <h2 class="text-5xl font-black mb-6 tracking-tight">Administração</h2>
-                    <p class="text-slate-400 mb-12 max-w-md font-medium text-lg">O seu painel está seguro. Pode configurar permissões e integrações em breve nesta secção.</p>
-                    
-                    <button onclick="isAuthenticated=false; render();" class="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-sm hover:bg-slate-800 transition-all">
-                        <i data-lucide="log-out" size="18"></i> Sair do Sistema
-                    </button>
-                </div>
-            `;
-        }
-
-        function renderEmDesenvolvimento(container) {
-            container.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-40 text-center opacity-10 animate-fade-in">
-                    <div class="font-black text-7xl md:text-9xl italic uppercase tracking-tighter leading-none">Em<br/>Breve</div>
-                </div>
-            `;
-        }
-
-        // Inicializar aplicação
-        document.addEventListener('DOMContentLoaded', init);
+        // Iniciar
+        render();
     </script>
 </body>
 </html>
